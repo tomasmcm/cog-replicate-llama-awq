@@ -6,3 +6,5 @@
 4. Run `cog login`
 5. Run `cog push r8.im/<your-username>/<your-model-name>`
 6. `docker system prune` to cleanup temp images
+
+Thanks to nateraw on https://github.com/nateraw/replicate-examples
