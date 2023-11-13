@@ -7,7 +7,7 @@ class Predictor(BasePredictor):
 
     def setup(self):
         self.llm = LLM(
-            model="./models/<model_name>",
+            model="./models/TheBloke_Llama-2-7B-Chat-AWQ",
             quantization="awq",
             dtype="auto",
             gpu_memory_utilization=0.8,
@@ -18,40 +18,54 @@ class Predictor(BasePredictor):
 
     def predict(
         self,
-        prompt: str = Input(description=f"Text prompt to send to the model."),
-        max_new_tokens: int = Input(
-            description="The maximum number of tokens the model should generate as output.",
+        prompt: str = Input(
+            description="Text prompt to send to the model."
+        ),
+        max_tokens: int = Input(
+            description="Maximum number of tokens to generate per output sequence.",
             default=128,
         ),
+        presence_penalty: float = Input(
+            description="Float that penalizes new tokens based on whether they appear in the generated text so far. Values > 0 encourage the model to use new tokens, while values < 0 encourage the model to repeat tokens.",
+            ge=-5,
+            le=5,
+            default=0.0,
+        ),
+        frequency_penalty: float = Input(
+            description="Float that penalizes new tokens based on their frequency in the generated text so far. Values > 0 encourage the model to use new tokens, while values < 0 encourage the model to repeat tokens.",
+            ge=-5,
+            le=5,
+            default=0.0,
+        ),
         temperature: float = Input(
-            description="The value used to modulate the next token probabilities.",
+            description="Float that controls the randomness of the sampling. Lower values make the model more deterministic, while higher values make the model more random. Zero means greedy sampling.",
             ge=0.01,
             le=5,
             default=0.8,
         ),
         top_p: float = Input(
-            description="A probability threshold for generating the output. If < 1.0, only keep the top tokens with cumulative probability >= top_p (nucleus filtering). Nucleus filtering is described in Holtzman et al. (http://arxiv.org/abs/1904.09751).",
+            description="Float that controls the cumulative probability of the top tokens to consider. Must be in (0, 1]. Set to 1 to consider all tokens.",
             ge=0.01,
             le=1.0,
-            default=0.95
+            default=0.95,
         ),
         top_k: int = Input(
-            description="The number of highest probability tokens to consider for generating the output. If > 0, only keep the top k tokens with highest probability (top-k filtering).",
-            default=50,
+            description="Integer that controls the number of top tokens to consider. Set to -1 to consider all tokens.",
+            default=-1,
         ),
-        presence_penalty: float = Input(
-            description="Presence penalty",
-            ge=0.01,
-            le=5,
-            default=1.0
-        ),
+        stop: str = Input(
+            description="List of strings that stop the generation when they are generated. The returned output will not contain the stop strings.",
+            default=None,
+        )
     ) -> str:
         sampling_params = SamplingParams(
-            max_tokens=max_new_tokens,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty,
             temperature=temperature,
             top_p=top_p,
             top_k=top_k,
-            presence_penalty=presence_penalty
+            stop=stop,
+            max_tokens=max_tokens
         )
         start = time.time()
         outputs = self.llm.generate([prompt], sampling_params)
