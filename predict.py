@@ -12,7 +12,6 @@ class Predictor(BasePredictor):
             dtype="auto",
             gpu_memory_utilization=0.8,
             max_num_batched_tokens=32768,
-            max_model_len=512,
             tensor_parallel_size=1
         )
 
