@@ -7,7 +7,7 @@ class Predictor(BasePredictor):
 
     def setup(self):
         self.llm = LLM(
-            model="./models/TheBloke_Llama-2-7B-Chat-AWQ",
+            model="./models/<model_name>",
             quantization="awq",
             dtype="auto",
             gpu_memory_utilization=0.8,
